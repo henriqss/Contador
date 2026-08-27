@@ -1,0 +1,2298 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Contadores</title>
+
+
+  <style>
+
+    /* =========================================================
+       CORES
+    ========================================================= */
+
+    :root {
+
+      --bg: #000000;
+
+      --card: #08090c;
+
+      --border: #24262d;
+
+      --text: #e7e7ea;
+
+      --muted: #9699a3;
+
+
+      /*
+        CINZA
+        Ainda não começou.
+      */
+
+      --not-started: #aeb2bb;
+
+
+      /*
+        ROSA
+        Está em andamento.
+      */
+
+      --running: #ff6b86;
+
+
+      /*
+        VERDE
+        Já terminou.
+      */
+
+      --finished: #35d07f;
+
+    }
+
+
+    /* =========================================================
+       RESET
+    ========================================================= */
+
+    * {
+
+      box-sizing:
+        border-box;
+
+    }
+
+
+    html,
+    body {
+
+      margin:
+        0;
+
+      min-height:
+        100%;
+
+      background:
+        var(--bg);
+
+      color:
+        var(--text);
+
+      font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    }
+
+
+    body {
+
+      padding:
+        28px
+        16px
+        40px;
+
+    }
+
+
+    .page {
+
+      width:
+        min(
+          1100px,
+          100%
+        );
+
+      margin:
+        0 auto;
+
+    }
+
+
+    /* =========================================================
+       CABEÇALHO
+    ========================================================= */
+
+    header {
+
+      text-align:
+        center;
+
+      margin-bottom:
+        28px;
+
+    }
+
+
+    h1 {
+
+      margin:
+        0;
+
+      font-size:
+        clamp(
+          24px,
+          4vw,
+          36px
+        );
+
+      font-weight:
+        700;
+
+      letter-spacing:
+        -0.5px;
+
+    }
+
+
+    /* =========================================================
+       LEGENDA
+    ========================================================= */
+
+    .legend {
+
+      display:
+        flex;
+
+      justify-content:
+        center;
+
+      align-items:
+        center;
+
+      flex-wrap:
+        wrap;
+
+      gap:
+        18px;
+
+      margin-top:
+        18px;
+
+      padding:
+        13px
+        18px;
+
+      border:
+        1px solid var(--border);
+
+      border-radius:
+        8px;
+
+      background:
+        #050609;
+
+    }
+
+
+    .legend-item {
+
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      gap:
+        7px;
+
+      color:
+        var(--muted);
+
+      font-size:
+        13px;
+
+    }
+
+
+    .legend-dot {
+
+      width:
+        10px;
+
+      height:
+        10px;
+
+      border-radius:
+        50%;
+
+      flex-shrink:
+        0;
+
+    }
+
+
+    /* =========================================================
+       BOLINHA CINZA
+       AINDA NÃO COMEÇOU
+    ========================================================= */
+
+    .legend-dot.not-started {
+
+      background:
+        var(--not-started);
+
+      box-shadow:
+        0 0 8px
+        rgba(
+          174,
+          178,
+          187,
+          0.35
+        );
+
+    }
+
+
+    /* =========================================================
+       BOLINHA ROSA
+       EM ANDAMENTO
+    ========================================================= */
+
+    .legend-dot.running {
+
+      background:
+        var(--running);
+
+      box-shadow:
+        0 0 8px
+        rgba(
+          255,
+          107,
+          134,
+          0.4
+        );
+
+    }
+
+
+    /* =========================================================
+       BOLINHA VERDE
+       CONCLUÍDO
+    ========================================================= */
+
+    .legend-dot.finished {
+
+      background:
+        var(--finished);
+
+      box-shadow:
+        0 0 8px
+        rgba(
+          53,
+          208,
+          127,
+          0.4
+        );
+
+    }
+
+
+    /* =========================================================
+       STATUS
+    ========================================================= */
+
+    #status {
+
+      min-height:
+        18px;
+
+      margin-top:
+        12px;
+
+      color:
+        var(--muted);
+
+      font-size:
+        13px;
+
+    }
+
+
+    /* =========================================================
+       GRID
+    ========================================================= */
+
+    .grid {
+
+      display:
+        grid;
+
+      grid-template-columns:
+        repeat(
+          2,
+          minmax(
+            0,
+            1fr
+          )
+        );
+
+      gap:
+        18px;
+
+    }
+
+
+    /* =========================================================
+       CARD
+    ========================================================= */
+
+    .counter {
+
+      overflow:
+        hidden;
+
+      background:
+        var(--card);
+
+      border:
+        1px solid var(--border);
+
+      border-radius:
+        9px;
+
+      transition:
+        border-color
+        0.25s ease,
+
+        box-shadow
+        0.25s ease;
+
+    }
+
+
+    /* =========================================================
+       CARD - AINDA NÃO COMEÇOU
+       CINZA
+    ========================================================= */
+
+    .counter.not-started {
+
+      border-color:
+        rgba(
+          174,
+          178,
+          187,
+          0.45
+        );
+
+      box-shadow:
+        0 0 20px
+        rgba(
+          174,
+          178,
+          187,
+          0.04
+        );
+
+    }
+
+
+    /* =========================================================
+       CARD - EM ANDAMENTO
+       ROSA
+    ========================================================= */
+
+    .counter.running {
+
+      border-color:
+        rgba(
+          255,
+          107,
+          134,
+          0.55
+        );
+
+      box-shadow:
+        0 0 20px
+        rgba(
+          255,
+          107,
+          134,
+          0.06
+        );
+
+    }
+
+
+    /* =========================================================
+       CARD - CONCLUÍDO
+       VERDE
+    ========================================================= */
+
+    .counter.finished {
+
+      border-color:
+        rgba(
+          53,
+          208,
+          127,
+          0.65
+        );
+
+      box-shadow:
+        0 0 24px
+        rgba(
+          53,
+          208,
+          127,
+          0.07
+        );
+
+    }
+
+
+    /* =========================================================
+       TÍTULO
+    ========================================================= */
+
+    .counter-title {
+
+      min-height:
+        54px;
+
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      justify-content:
+        center;
+
+      padding:
+        12px
+        16px;
+
+      border-bottom:
+        1px solid var(--border);
+
+      font-size:
+        clamp(
+          19px,
+          2.2vw,
+          25px
+        );
+
+      font-weight:
+        700;
+
+      text-align:
+        center;
+
+    }
+
+
+    /* =========================================================
+       CONTADOR
+    ========================================================= */
+
+    .timer {
+
+      display:
+        grid;
+
+      grid-template-columns:
+        repeat(
+          4,
+          1fr
+        );
+
+      gap:
+        8px;
+
+      padding:
+        24px
+        14px
+        20px;
+
+      text-align:
+        center;
+
+    }
+
+
+    /* =========================================================
+       NÚMEROS
+    ========================================================= */
+
+    .value {
+
+      font-family:
+        "Courier New",
+        Courier,
+        monospace;
+
+      font-size:
+        clamp(
+          30px,
+          5vw,
+          55px
+        );
+
+      line-height:
+        1;
+
+      font-weight:
+        400;
+
+      font-variant-numeric:
+        tabular-nums;
+
+      transition:
+        color
+        0.25s ease;
+
+    }
+
+
+    /* =========================================================
+       NÚMEROS CINZA
+       AINDA NÃO COMEÇOU
+    ========================================================= */
+
+    .not-started .value {
+
+      color:
+        var(--not-started);
+
+    }
+
+
+    /* =========================================================
+       NÚMEROS ROSA
+       EM ANDAMENTO
+    ========================================================= */
+
+    .running .value {
+
+      color:
+        var(--running);
+
+    }
+
+
+    /* =========================================================
+       NÚMEROS VERDES
+       CONCLUÍDO
+    ========================================================= */
+
+    .finished .value {
+
+      color:
+        var(--finished);
+
+    }
+
+
+    /* =========================================================
+       NOME DAS UNIDADES
+    ========================================================= */
+
+    .label {
+
+      margin-top:
+        9px;
+
+      color:
+        var(--muted);
+
+      font-size:
+        13px;
+
+    }
+
+
+    /* =========================================================
+       DATAS
+    ========================================================= */
+
+    .range {
+
+      border-top:
+        1px solid var(--border);
+
+      padding:
+        11px
+        16px
+        13px;
+
+      color:
+        var(--muted);
+
+      text-align:
+        center;
+
+      font-size:
+        12px;
+
+    }
+
+
+    /* =========================================================
+       MENSAGENS
+    ========================================================= */
+
+    .empty,
+    .error {
+
+      grid-column:
+        1 / -1;
+
+      padding:
+        28px
+        20px;
+
+      background:
+        var(--card);
+
+      border:
+        1px solid var(--border);
+
+      border-radius:
+        9px;
+
+      color:
+        var(--muted);
+
+      text-align:
+        center;
+
+    }
+
+
+    .error {
+
+      color:
+        #ff9aaa;
+
+    }
+
+
+    /* =========================================================
+       CELULAR
+    ========================================================= */
+
+    @media (
+      max-width: 700px
+    ) {
+
+
+      body {
+
+        padding:
+          18px
+          10px
+          28px;
+
+      }
+
+
+      .grid {
+
+        grid-template-columns:
+          1fr;
+
+        gap:
+          12px;
+
+      }
+
+
+      header {
+
+        margin-bottom:
+          18px;
+
+      }
+
+
+      .legend {
+
+        flex-direction:
+          column;
+
+        align-items:
+          flex-start;
+
+        gap:
+          10px;
+
+        width:
+          fit-content;
+
+        margin-left:
+          auto;
+
+        margin-right:
+          auto;
+
+      }
+
+
+      .timer {
+
+        padding:
+          20px
+          8px
+          17px;
+
+      }
+
+
+      .value {
+
+        font-size:
+          clamp(
+            29px,
+            11vw,
+            46px
+          );
+
+      }
+
+
+      .label {
+
+        font-size:
+          11px;
+
+      }
+
+
+      .range {
+
+        font-size:
+          11px;
+
+      }
+
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+
+  <main class="page">
+
+
+    <!-- =====================================================
+         CABEÇALHO
+    ====================================================== -->
+
+    <header>
+
+
+      <h1>
+        Contadores
+      </h1>
+
+
+      <!-- ===================================================
+           LEGENDA DAS CORES
+      ==================================================== -->
+
+      <div class="legend">
+
+
+        <!-- CINZA -->
+
+        <div class="legend-item">
+
+          <span
+            class="legend-dot not-started">
+          </span>
+
+          <span>
+            Ainda não começou
+          </span>
+
+        </div>
+
+
+        <!-- ROSA -->
+
+        <div class="legend-item">
+
+          <span
+            class="legend-dot running">
+          </span>
+
+          <span>
+            Em andamento
+          </span>
+
+        </div>
+
+
+        <!-- VERDE -->
+
+        <div class="legend-item">
+
+          <span
+            class="legend-dot finished">
+          </span>
+
+          <span>
+            Concluído
+          </span>
+
+        </div>
+
+
+      </div>
+
+
+      <div id="status">
+        Carregando...
+      </div>
+
+
+    </header>
+
+
+
+    <!-- =====================================================
+         CONTADORES
+    ====================================================== -->
+
+    <section
+      id="counters"
+      class="grid"
+    >
+    </section>
+
+
+  </main>
+
+
+
+  <script>
+
+
+    /* =========================================================
+       CONFIGURAÇÃO
+    ========================================================= */
+
+
+    /*
+       Arquivo dos contadores.
+
+       Deve ficar na mesma pasta
+       do index.html.
+
+       Estrutura:
+
+       index.html
+       contadores.txt
+    */
+
+    const DATA_FILE =
+      "./contadores.txt";
+
+
+    /*
+       Fuso horário utilizado
+       para interpretar as datas.
+
+       Horário de Brasília.
+    */
+
+    const TIME_ZONE =
+      "America/Sao_Paulo";
+
+
+    /*
+       Elementos da página.
+    */
+
+    const countersEl =
+      document.getElementById(
+        "counters"
+      );
+
+
+    const statusEl =
+      document.getElementById(
+        "status"
+      );
+
+
+    /*
+       Lista dos contadores.
+    */
+
+    const counters = [];
+
+
+
+    /* =========================================================
+       CONVERTER DATA PARA TIMESTAMP
+    ========================================================= */
+
+    function zonedDateToTimestamp(
+      parts,
+      timeZone
+    ) {
+
+
+      const guess =
+        Date.UTC(
+
+          parts.year,
+
+          parts.month - 1,
+
+          parts.day,
+
+          parts.hour,
+
+          parts.minute,
+
+          parts.second || 0
+
+        );
+
+
+      const formatter =
+        new Intl.DateTimeFormat(
+
+          "en-US",
+
+          {
+
+            timeZone,
+
+            year:
+              "numeric",
+
+            month:
+              "2-digit",
+
+            day:
+              "2-digit",
+
+            hour:
+              "2-digit",
+
+            minute:
+              "2-digit",
+
+            second:
+              "2-digit",
+
+            hourCycle:
+              "h23"
+
+          }
+
+        );
+
+
+      function getParts(
+        timestamp
+      ) {
+
+
+        const result = {};
+
+
+        for (
+
+          const part of
+          formatter.formatToParts(
+
+            new Date(
+              timestamp
+            )
+
+          )
+
+        ) {
+
+
+          if (
+
+            part.type !==
+            "literal"
+
+          ) {
+
+
+            result[
+              part.type
+            ] =
+              Number(
+                part.value
+              );
+
+          }
+
+        }
+
+
+        return result;
+
+      }
+
+
+      let local =
+        getParts(
+          guess
+        );
+
+
+      let interpreted =
+        Date.UTC(
+
+          local.year,
+
+          local.month - 1,
+
+          local.day,
+
+          local.hour,
+
+          local.minute,
+
+          local.second
+
+        );
+
+
+      let timestamp =
+        guess +
+        (
+          guess -
+          interpreted
+        );
+
+
+      local =
+        getParts(
+          timestamp
+        );
+
+
+      interpreted =
+        Date.UTC(
+
+          local.year,
+
+          local.month - 1,
+
+          local.day,
+
+          local.hour,
+
+          local.minute,
+
+          local.second
+
+        );
+
+
+      timestamp +=
+        guess -
+        interpreted;
+
+
+      return timestamp;
+
+    }
+
+
+
+    /* =========================================================
+       INTERPRETAR DATA BRASILEIRA
+    =========================================================
+
+       Formato:
+
+       DD/MM/AAAA HH:MM
+
+       Exemplos:
+
+       01/01/2026 01:00
+
+       01/01/2026 13:00
+
+       27/08/2026 18:30
+
+       31/12/2026 23:59
+
+    ========================================================= */
+
+    function parseDateTime(
+      text
+    ) {
+
+
+      const value =
+        text
+          .trim()
+          .replace(
+            /\s+/g,
+            " "
+          );
+
+
+      /*
+         Somente formato 24 horas.
+      */
+
+      const match =
+        value.match(
+
+          /^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})$/
+
+        );
+
+
+      if (!match) {
+
+
+        throw new Error(
+
+          `Data inválida: ${text}`
+
+        );
+
+      }
+
+
+      let [
+
+        ,
+
+        day,
+
+        month,
+
+        year,
+
+        hour,
+
+        minute
+
+      ] = match;
+
+
+      day =
+        Number(day);
+
+
+      month =
+        Number(month);
+
+
+      year =
+        Number(year);
+
+
+      hour =
+        Number(hour);
+
+
+      minute =
+        Number(minute);
+
+
+      /*
+         Verifica a hora.
+      */
+
+      if (
+
+        hour < 0 ||
+        hour > 23
+
+      ) {
+
+
+        throw new Error(
+
+          `Hora inválida: ${text}`
+
+        );
+
+      }
+
+
+      /*
+         Verifica os minutos.
+      */
+
+      if (
+
+        minute < 0 ||
+        minute > 59
+
+      ) {
+
+
+        throw new Error(
+
+          `Minutos inválidos: ${text}`
+
+        );
+
+      }
+
+
+      return zonedDateToTimestamp(
+
+        {
+
+          year,
+
+          month,
+
+          day,
+
+          hour,
+
+          minute,
+
+          second: 0
+
+        },
+
+        TIME_ZONE
+
+      );
+
+    }
+
+
+
+    /* =========================================================
+       LER contadores.txt
+    =========================================================
+
+       Formato:
+
+       Título: DD/MM/AAAA HH:MM > DD/MM/AAAA HH:MM
+
+       Exemplo:
+
+       Site: 01/01/2026 01:00 > 01/01/2026 13:00
+
+    ========================================================= */
+
+    function parseFile(
+      text
+    ) {
+
+
+      const result = [];
+
+
+      const lines =
+        text.split(
+          /\r?\n/
+        );
+
+
+      lines.forEach(
+
+        (
+          line,
+          index
+        ) => {
+
+
+          const clean =
+            line.trim();
+
+
+          /*
+             Ignora linhas vazias.
+          */
+
+          if (
+            !clean
+          ) {
+
+            return;
+
+          }
+
+
+          /*
+             Ignora comentários.
+
+             Exemplo:
+
+             # comentário
+          */
+
+          if (
+            clean.startsWith("#")
+          ) {
+
+            return;
+
+          }
+
+
+          /*
+             Encontra o ":" do título.
+          */
+
+          const separator =
+            clean.indexOf(
+              ":"
+            );
+
+
+          /*
+             Encontra o ">" entre as datas.
+          */
+
+          const arrow =
+            clean.indexOf(
+              ">"
+            );
+
+
+          /*
+             Verifica o formato.
+          */
+
+          if (
+
+            separator === -1 ||
+
+            arrow === -1 ||
+
+            arrow < separator
+
+          ) {
+
+
+            console.warn(
+
+              `Linha ${
+                index + 1
+              } ignorada. Formato inválido.`
+
+            );
+
+
+            return;
+
+          }
+
+
+          /*
+             Título.
+          */
+
+          const title =
+            clean
+              .slice(
+                0,
+                separator
+              )
+              .trim();
+
+
+          /*
+             Data inicial.
+          */
+
+          const startText =
+            clean
+              .slice(
+
+                separator + 1,
+
+                arrow
+
+              )
+              .trim();
+
+
+          /*
+             Data final.
+          */
+
+          const endText =
+            clean
+              .slice(
+                arrow + 1
+              )
+              .trim();
+
+
+          if (
+            !title
+          ) {
+
+            return;
+
+          }
+
+
+          try {
+
+
+            const start =
+              parseDateTime(
+                startText
+              );
+
+
+            const end =
+              parseDateTime(
+                endText
+              );
+
+
+            /*
+               O final precisa
+               ser depois do início.
+            */
+
+            if (
+              end <= start
+            ) {
+
+
+              console.warn(
+
+                `Linha ${
+                  index + 1
+                } ignorada: `
+                +
+                `o final deve ser depois do início.`
+
+              );
+
+
+              return;
+
+            }
+
+
+            result.push({
+
+              title,
+
+              start,
+
+              end,
+
+              startText,
+
+              endText
+
+            });
+
+
+          }
+          catch (
+            error
+          ) {
+
+
+            console.warn(
+
+              `Linha ${
+                index + 1
+              } ignorada:`,
+
+              error.message
+
+            );
+
+          }
+
+        }
+
+      );
+
+
+      return result;
+
+    }
+
+
+
+    /* =========================================================
+       ADICIONAR ZERO NA FRENTE
+    ========================================================= */
+
+    function pad(
+      value
+    ) {
+
+      return String(
+        value
+      ).padStart(
+        2,
+        "0"
+      );
+
+    }
+
+
+
+    /* =========================================================
+       TRANSFORMAR TEMPO
+    ========================================================= */
+
+    function getDurationParts(
+      milliseconds
+    ) {
+
+
+      const totalSeconds =
+        Math.floor(
+
+          Math.abs(
+            milliseconds
+          ) / 1000
+
+        );
+
+
+      return {
+
+
+        days:
+          Math.floor(
+
+            totalSeconds /
+            86400
+
+          ),
+
+
+        hours:
+          Math.floor(
+
+            (
+              totalSeconds %
+              86400
+
+            ) / 3600
+
+          ),
+
+
+        minutes:
+          Math.floor(
+
+            (
+              totalSeconds %
+              3600
+
+            ) / 60
+
+          ),
+
+
+        seconds:
+          totalSeconds %
+          60
+
+      };
+
+    }
+
+
+
+    /* =========================================================
+       CRIAR CARD
+    ========================================================= */
+
+    function createCounter(
+      item
+    ) {
+
+
+      const article =
+        document.createElement(
+          "article"
+        );
+
+
+      article.className =
+        "counter";
+
+
+      article.innerHTML = `
+
+        <div
+          class="counter-title"
+        >
+        </div>
+
+
+        <div
+          class="timer"
+        >
+
+
+          <div>
+
+            <div
+              class="value days"
+            >
+              00
+            </div>
+
+            <div
+              class="label"
+            >
+              Dias
+            </div>
+
+          </div>
+
+
+          <div>
+
+            <div
+              class="value hours"
+            >
+              00
+            </div>
+
+            <div
+              class="label"
+            >
+              Horas
+            </div>
+
+          </div>
+
+
+          <div>
+
+            <div
+              class="value minutes"
+            >
+              00
+            </div>
+
+            <div
+              class="label"
+            >
+              Minutos
+            </div>
+
+          </div>
+
+
+          <div>
+
+            <div
+              class="value seconds"
+            >
+              00
+            </div>
+
+            <div
+              class="label"
+            >
+              Segundos
+            </div>
+
+          </div>
+
+
+        </div>
+
+
+        <div
+          class="range"
+        >
+        </div>
+
+      `;
+
+
+      /*
+         Título.
+      */
+
+      article.querySelector(
+
+        ".counter-title"
+
+      ).textContent =
+        item.title;
+
+
+      /*
+         Datas.
+      */
+
+      article.querySelector(
+
+        ".range"
+
+      ).textContent =
+
+        `${item.startText} → ${item.endText}`;
+
+
+      /*
+         Referências aos números.
+      */
+
+      return {
+
+
+        article,
+
+
+        days:
+          article.querySelector(
+            ".days"
+          ),
+
+
+        hours:
+          article.querySelector(
+            ".hours"
+          ),
+
+
+        minutes:
+          article.querySelector(
+            ".minutes"
+          ),
+
+
+        seconds:
+          article.querySelector(
+            ".seconds"
+          )
+
+      };
+
+    }
+
+
+
+    /* =========================================================
+       ATUALIZAR UM CONTADOR
+    ========================================================= */
+
+    function updateCounter(
+
+      item,
+
+      refs,
+
+      now
+
+    ) {
+
+
+      let milliseconds;
+
+
+      /*
+      ============================================================
+      ESTADO 1
+      AINDA NÃO COMEÇOU
+      ============================================================
+
+      COR: CINZA
+
+      Mostra quanto falta
+      para começar.
+      ============================================================
+      */
+
+      if (
+
+        now <
+        item.start
+
+      ) {
+
+
+        milliseconds =
+          item.start -
+          now;
+
+
+        refs.article.classList.remove(
+
+          "running",
+
+          "finished"
+
+        );
+
+
+        refs.article.classList.add(
+
+          "not-started"
+
+        );
+
+      }
+
+
+      /*
+      ============================================================
+      ESTADO 2
+      EM ANDAMENTO
+      ============================================================
+
+      COR: ROSA
+
+      Mostra quanto falta
+      para terminar.
+      ============================================================
+      */
+
+      else if (
+
+        now <
+        item.end
+
+      ) {
+
+
+        milliseconds =
+          item.end -
+          now;
+
+
+        refs.article.classList.remove(
+
+          "not-started",
+
+          "finished"
+
+        );
+
+
+        refs.article.classList.add(
+
+          "running"
+
+        );
+
+      }
+
+
+      /*
+      ============================================================
+      ESTADO 3
+      CONCLUÍDO
+      ============================================================
+
+      COR: VERDE
+
+      Mostra quanto tempo
+      já passou desde o final.
+      ============================================================
+      */
+
+      else {
+
+
+        milliseconds =
+          now -
+          item.end;
+
+
+        refs.article.classList.remove(
+
+          "not-started",
+
+          "running"
+
+        );
+
+
+        refs.article.classList.add(
+
+          "finished"
+
+        );
+
+      }
+
+
+      /*
+         Divide o tempo.
+      */
+
+      const parts =
+        getDurationParts(
+          milliseconds
+        );
+
+
+      /*
+         Dias.
+      */
+
+      refs.days.textContent =
+        pad(
+          parts.days
+        );
+
+
+      /*
+         Horas.
+      */
+
+      refs.hours.textContent =
+        pad(
+          parts.hours
+        );
+
+
+      /*
+         Minutos.
+      */
+
+      refs.minutes.textContent =
+        pad(
+          parts.minutes
+        );
+
+
+      /*
+         Segundos.
+      */
+
+      refs.seconds.textContent =
+        pad(
+          parts.seconds
+        );
+
+    }
+
+
+
+    /* =========================================================
+       DESENHAR OS CONTADORES
+    ========================================================= */
+
+    function render() {
+
+
+      countersEl.innerHTML =
+        "";
+
+
+      /*
+         Caso não tenha nenhum contador.
+      */
+
+      if (
+        !counters.length
+      ) {
+
+
+        countersEl.innerHTML = `
+
+          <div class="empty">
+
+            Nenhum contador encontrado
+            no arquivo contadores.txt.
+
+          </div>
+
+        `;
+
+
+        return;
+
+      }
+
+
+      /*
+         Cria todos os cards.
+      */
+
+      counters.forEach(
+
+        item => {
+
+
+          item.refs =
+            createCounter(
+              item
+            );
+
+
+          countersEl.appendChild(
+
+            item.refs.article
+
+          );
+
+        }
+
+      );
+
+    }
+
+
+
+    /* =========================================================
+       ATUALIZAR TODOS OS CONTADORES
+    ========================================================= */
+
+    function updateAll() {
+
+
+      const now =
+        Date.now();
+
+
+      counters.forEach(
+
+        item => {
+
+
+          updateCounter(
+
+            item,
+
+            item.refs,
+
+            now
+
+          );
+
+        }
+
+      );
+
+    }
+
+
+
+    /* =========================================================
+       CARREGAR contadores.txt
+    ========================================================= */
+
+    async function loadCounters() {
+
+
+      try {
+
+
+        /*
+           Faz o download do TXT.
+
+           O timestamp evita cache.
+        */
+
+        const response =
+          await fetch(
+
+            `${DATA_FILE}?t=${Date.now()}`,
+
+            {
+
+              cache:
+                "no-store"
+
+            }
+
+          );
+
+
+        /*
+           Verifica se o arquivo existe.
+        */
+
+        if (
+          !response.ok
+        ) {
+
+
+          throw new Error(
+
+            `HTTP ${
+              response.status
+            }`
+
+          );
+
+        }
+
+
+        /*
+           Lê o arquivo como texto.
+        */
+
+        const text =
+          await response.text();
+
+
+        /*
+           Converte o texto
+           em contadores.
+        */
+
+        const parsed =
+          parseFile(
+            text
+          );
+
+
+        /*
+           Atualiza a lista.
+        */
+
+        counters.splice(
+
+          0,
+
+          counters.length,
+
+          ...parsed
+
+        );
+
+
+        /*
+           Desenha os cards.
+        */
+
+        render();
+
+
+        /*
+           Atualiza imediatamente.
+        */
+
+        updateAll();
+
+
+        /*
+           Mostra o status.
+        */
+
+        statusEl.textContent =
+
+          `${counters.length} contador${
+            counters.length === 1
+              ? ""
+              : "es"
+          } carregado${
+            counters.length === 1
+              ? ""
+              : "s"
+          }.`;
+
+      }
+      catch (
+        error
+      ) {
+
+
+        console.error(
+          error
+        );
+
+
+        statusEl.textContent =
+
+          "Não foi possível carregar os contadores.";
+
+
+        countersEl.innerHTML = `
+
+          <div class="error">
+
+            Não foi possível carregar
+            o arquivo
+            <b>contadores.txt</b>.
+
+            <br><br>
+
+            Verifique se ele está
+            no mesmo repositório
+            do index.html.
+
+          </div>
+
+        `;
+
+      }
+
+    }
+
+
+
+    /* =========================================================
+       INICIALIZAÇÃO
+    ========================================================= */
+
+
+    /*
+       Carrega o arquivo
+       ao abrir a página.
+    */
+
+    loadCounters();
+
+
+    /*
+       Atualiza os números
+       a cada segundo.
+    */
+
+    setInterval(
+
+      updateAll,
+
+      1000
+
+    );
+
+
+    /*
+       Recarrega o TXT
+       a cada 5 minutos.
+
+       Assim, se você alterar
+       o contadores.txt no GitHub,
+       o site eventualmente
+       atualiza sozinho.
+    */
+
+    setInterval(
+
+      loadCounters,
+
+      5 * 60 * 1000
+
+    );
+
+
+  </script>
+
+
+</body>
+
+</html>
